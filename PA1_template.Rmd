@@ -1,20 +1,76 @@
 # Reproducible Research: Peer Assessment 1
 
-
 ## Loading and preprocessing the data
+```{r loaddataset, echo=TRUE}
+#Unzip file repdata-data-activity.zip
+activity <- read.csv("activity.csv", header=TRUE, na.strings="NA")
 
-
+```
 
 ## What is mean total number of steps taken per day?
+```{r plot, fig.height=6, fig.width=6}
+library(ggplot2)
 
+df <- aggregate(steps ~ date, data=activity, FUN=sum, na.rm=TRUE)
+#plot summary of daily steps
+ggplot(data=df, aes(steps)) + geom_histogram(binwidth=5000)
+
+activity.average <- aggregate(steps ~ date, data=activity, FUN=mean, na.rm=TRUE)
+activity.median <- aggregate(steps ~ date, data=activity, FUN=median, na.rm=TRUE)
+
+activity.average
+activity.median
+```
 
 
 ## What is the average daily activity pattern?
+```{r averagedailypattern, echo=TRUE}
+df <- aggregate(interval ~ steps, data=activity, mean)
+ggplot(df, aes(steps, interval)) + geom_line()
 
+maxSteps <- df[which.max(df$interval), ]$steps
+```
+The maximum number of steps is `r maxSteps`
 
 
 ## Imputing missing values
+```{r missingvalues, echo=TRUE}
+summary(activity)
+missingCount <- nrow(activity[is.na(activity$steps), ])
+print(paste('The number of missing step values is ', missingCount))
+```
 
+I plan to use the weekday and Interval as the basis for imputing missing step values.
+The median of step using the combination of interval and weekday (df) was created to act as a lookup.
+For all values of NA in the activity data set a lookup of interval and weekday is done on the df data frame for the median values of step
+
+```{r imputevalues, echo=TRUE}
+#copy activity into new dataset
+newActivity <- activity
+#create new column for weekday
+newActivity$weekday <- weekdays(as.Date(newActivity$date))
+
+df <- aggregate(steps ~ interval + weekday, data=newActivity, FUN=median, na.rm=TRUE)
+
+for(i in 1:nrow(newActivity))
+{
+  if(is.na(newActivity[i, 1]))
+  {
+    Interval <- newActivity[i, 3]
+    Weekday <- newActivity[i, 4]
+
+    # lookup values of interval and weekday in df and replace NA with the resulting step value
+    newActivity[i, 1] <- df[df$interval == Interval & df$weekday == Weekday, ]$steps
+  }
+}
+
+summary(newActivity)
+
+df <- aggregate(steps ~ date, data=newActivity, FUN=sum, na.rm=TRUE)
+#plot summary of daily steps
+ggplot(data=df, aes(steps)) + geom_histogram(binwidth=5000)
+
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
