@@ -149,7 +149,7 @@ activity.median
 
 ```r
 df <- aggregate(steps ~ interval, data=activity, mean)
-ggplot(df, aes(steps, interval)) + geom_line()
+ggplot(df, aes(interval, steps)) + geom_line()
 ```
 
 ![plot of chunk averagedailypattern](figure/averagedailypattern.png) 
@@ -386,7 +386,7 @@ newActivity[newActivity$weekdaytype == FALSE, ]$weekdaytype <- 'Weekend'
 newActivity$weekdaytype <- factor(newActivity$weekdaytype)
 
 df <- aggregate(steps ~ weekdaytype + interval, data=newActivity, mean, na.rm=TRUE)
-ggplot(df, aes(steps, interval)) + geom_line() + facet_grid(weekdaytype ~ .)
+ggplot(df, aes(interval, steps)) + geom_line() + facet_grid(weekdaytype ~ .)
 ```
 
 ![plot of chunk differences](figure/differences.png) 

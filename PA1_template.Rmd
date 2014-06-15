@@ -26,7 +26,7 @@ activity.median
 ## What is the average daily activity pattern?
 ```{r averagedailypattern, echo=TRUE}
 df <- aggregate(steps ~ interval, data=activity, mean)
-ggplot(df, aes(steps, interval)) + geom_line()
+ggplot(df, aes(interval, steps)) + geom_line()
 
 maxSteps <- df[which.max(df$steps), ]$interval
 ```
@@ -89,6 +89,6 @@ newActivity[newActivity$weekdaytype == FALSE, ]$weekdaytype <- 'Weekend'
 newActivity$weekdaytype <- factor(newActivity$weekdaytype)
 
 df <- aggregate(steps ~ weekdaytype + interval, data=newActivity, mean, na.rm=TRUE)
-ggplot(df, aes(steps, interval)) + geom_line() + facet_grid(weekdaytype ~ .)
+ggplot(df, aes(interval, steps)) + geom_line() + facet_grid(weekdaytype ~ .)
 
 ```
