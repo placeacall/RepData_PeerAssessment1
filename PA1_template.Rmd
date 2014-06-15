@@ -25,10 +25,10 @@ activity.median
 
 ## What is the average daily activity pattern?
 ```{r averagedailypattern, echo=TRUE}
-df <- aggregate(interval ~ steps, data=activity, mean)
+df <- aggregate(steps ~ interval, data=activity, mean)
 ggplot(df, aes(steps, interval)) + geom_line()
 
-maxSteps <- df[which.max(df$interval), ]$steps
+maxSteps <- df[which.max(df$steps), ]$interval
 ```
 The maximum number of steps is `r maxSteps`
 
@@ -66,11 +66,29 @@ for(i in 1:nrow(newActivity))
 
 summary(newActivity)
 
-df <- aggregate(steps ~ date, data=newActivity, FUN=sum, na.rm=TRUE)
-#plot summary of daily steps
+df <- aggregate(steps ~ date + weekday, data=newActivity, FUN=sum, na.rm=TRUE)
+#plot summary of daily steps with imputed values
 ggplot(data=df, aes(steps)) + geom_histogram(binwidth=5000)
+
+newActivity.average <- aggregate(steps ~ date, data=newActivity, FUN=mean, na.rm=TRUE)
+newActivity.median <- aggregate(steps ~ date, data=newActivity, FUN=median, na.rm=TRUE)
+
+newActivity.average
+newActivity.median
 
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r differences, echo=TRUE}
+newActivity$weekdaytype <- newActivity$weekday %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+newActivity[newActivity$weekdaytype == TRUE, ]$weekdaytype <- 'Weekday'
+newActivity[newActivity$weekdaytype == FALSE, ]$weekdaytype <- 'Weekend'
+
+newActivity$weekdaytype <- factor(newActivity$weekdaytype)
+
+df <- aggregate(steps ~ weekdaytype + interval, data=newActivity, mean, na.rm=TRUE)
+ggplot(df, aes(steps, interval)) + geom_line() + facet_grid(weekdaytype ~ .)
+
+```
